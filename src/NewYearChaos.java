@@ -1,64 +1,69 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.ArrayList;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import java.util.Scanner;
 
-public class MovieTitles {
+public class NewYearChaos {
 
-  public static String request(String s) {
-    String result = null;
-    HttpURLConnection con = null;
-    BufferedReader reader = null;
-    try {
-      URL url = new URL(s);
-      con = (HttpURLConnection) url.openConnection();
-      con.setRequestMethod("GET");
-      con.setDoOutput(true);
-      reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
-      StringBuilder builder = new StringBuilder();
-      String line;
-      while ((line = reader.readLine()) != null) {
-        builder.append(line);
-      }
-      result = builder.toString();
-    } catch (Exception e) {
-      e.printStackTrace();
-    } finally {
-      if (con != null)
-        con.disconnect();
-      if (reader != null)
-        try {
-          reader.close();
-        } catch (IOException e) {
-          e.printStackTrace();
+  // Complete the minimumBribes function below.
+  static void minimumBribes(int[] a) {
+
+    // First attempt is not efficient when large amount of data
+    /*int totalbribes = 0;
+    for (int i = 0; i < a.length - 1; i++) {
+      int bribes = 0;
+      for (int j = i; j < a.length - 1; j++) {
+        if (a[i] > a[j + 1]) {
+          totalbribes++;
+          if (++bribes > 2) {
+            System.out.println("Too chaotic");
+            return;
+          }
         }
+      }
     }
-    return result;
+    System.out.println(totalbribes);*/
+
+    int bribe = 0;
+    int maxBribesAllowed = 2;
+    int n = a.length;
+    for (int i = 0; i < n; i++) {
+      // (a[i] - 1) = original index, e.g. the number 5 was at index 4
+      // Check if current value moved more than maxBribesAllowed
+      if ((a[i] - 1) - i > maxBribesAllowed) // Number of indexes moved
+      {
+        System.out.println("Too chaotic"); 
+        return;
+      }
+      // https://hackerranksolutionc.blogspot.com/2017/02/new-year-chaos-hackerrank-solution-in.html
+      // Dont get the logic on this line. Why the - maxBribesAllowed
+      int q = Math.max(0, a[i] - maxBribesAllowed);
+      for (int j = q; j < i; j++)
+        if (a[j] > a[i])
+          bribe++;
+    }
+    System.out.println(bribe);
   }
 
+  private static final Scanner scanner = new Scanner(System.in);
+
   public static void main(String[] args) {
-    ArrayList<String> titles = new ArrayList<>();
-    String url = "https://jsonmock.hackerrank.com/api/movies/search/?Title=" + args[0];
-    String json = request(url);
-    JsonObject jsonObject = new JsonParser().parse(json).getAsJsonObject();
-    JsonArray data = jsonObject.get("data").getAsJsonArray();
-    data.forEach(d -> titles.add(d.getAsJsonObject().get("Title").getAsString()));
-    int totalPages = jsonObject.get("total_pages").getAsInt();
-    int page = 2;
-    while (page <= totalPages) {
-      json = request(url + "&page=" + page);
-      data = jsonObject.get("data").getAsJsonArray();
-      data.forEach(d -> titles.add(d.getAsJsonObject().get("Title").getAsString()));
-      page++;
+    int t = scanner.nextInt();
+    scanner.skip("(\r\n|[\n\r\u2028\u2029\u0085])?");
+
+    for (int tItr = 0; tItr < t; tItr++) {
+      int n = scanner.nextInt();
+      scanner.skip("(\r\n|[\n\r\u2028\u2029\u0085])?");
+
+      int[] q = new int[n];
+
+      String[] qItems = scanner.nextLine().split(" ");
+      scanner.skip("(\r\n|[\n\r\u2028\u2029\u0085])?");
+
+      for (int i = 0; i < n; i++) {
+        int qItem = Integer.parseInt(qItems[i]);
+        q[i] = qItem;
+      }
+
+      minimumBribes(q);
     }
-    String[] strings = titles.stream().toArray(String[]::new);
-    for (String string : strings) {
-      System.out.println(string);
-    }
+    scanner.close();
   }
 }
